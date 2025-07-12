@@ -7,6 +7,8 @@ WORKDIR /app
 COPY package*.json ./
 COPY tsconfig.json ./
 COPY jest.config.js ./
+COPY vite.config.ts ./
+COPY index.html ./
 
 # Install all dependencies
 RUN npm ci
