@@ -19,6 +19,7 @@ export interface OptimizationResult {
 export class GraphOptimizer {
   private layout: ForceDirectedLayout;
   private visualizer?: GraphVisualizer;
+  private visualizerOptions?: Partial<VisualizationOptions>;
 
   constructor(
     layoutOptions?: Partial<LayoutOptions>,
@@ -27,7 +28,7 @@ export class GraphOptimizer {
     this.layout = new ForceDirectedLayout(layoutOptions);
     
     if (visualizerOptions) {
-      
+      this.visualizerOptions = visualizerOptions;
     }
   }
 
@@ -63,7 +64,8 @@ export class GraphOptimizer {
     edges: Edge[],
     options?: Partial<VisualizationOptions>
   ): void {
-    this.visualizer = new GraphVisualizer(container, options);
+    const mergedOptions = { ...this.visualizerOptions, ...options };
+    this.visualizer = new GraphVisualizer(container, mergedOptions);
     this.visualizer.render(nodes, edges);
   }
 
