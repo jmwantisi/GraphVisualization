@@ -20,6 +20,8 @@ export const MalawiGraphApp: React.FC = () => {
   const [selectedNode, setSelectedNode] = useState<Node | null>(null);
   const [hoveredNode, setHoveredNode] = useState<Node | null>(null);
   const [isOptimized, setIsOptimized] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const optimizer = new GraphOptimizer({
     width: 800,
@@ -34,15 +36,26 @@ export const MalawiGraphApp: React.FC = () => {
   });
 
   useEffect(() => {
-    // Run initial optimization
     optimizeGraph();
   }, []);
 
-  const optimizeGraph = () => {
-    const result = optimizer.optimizeGraph(malawiDistrictsData);
-    setOptimizedNodes(result.optimizedNodes);
-    setMetrics(result.metrics);
-    setIsOptimized(true);
+  const optimizeGraph = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      const result = optimizer.optimizeGraph(malawiDistrictsData);
+      setOptimizedNodes(result.optimizedNodes);
+      setMetrics(result.metrics);
+      setIsOptimized(true);
+    } catch (err) {
+      setError('Failed to optimize graph layout. Please try again.');
+      console.error('Optimization error:', err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const toggleView = () => {
@@ -96,11 +109,25 @@ Minimum Distance Between Any Two Nodes:
         <p>Interactive visualization of Malawi's district connections using force-directed layout optimization</p>
       </div>
 
+      {error && (
+        <div className="error">
+          <strong>Error:</strong> {error}
+        </div>
+      )}
+
       <div className="controls">
-        <button onClick={optimizeGraph} className="btn btn-primary">
-          Optimize Layout
+        <button 
+          onClick={optimizeGraph} 
+          className="btn btn-primary"
+          disabled={isLoading}
+        >
+          {isLoading ? 'Optimizing...' : 'Optimize Layout'}
         </button>
-        <button onClick={toggleView} className="btn btn-secondary">
+        <button 
+          onClick={toggleView} 
+          className="btn btn-secondary"
+          disabled={!optimizedNodes.length}
+        >
           {isOptimized ? 'Show Original' : 'Show Optimized'}
         </button>
       </div>
